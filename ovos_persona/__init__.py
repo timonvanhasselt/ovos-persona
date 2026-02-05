@@ -531,6 +531,12 @@ class PersonaService(ConfidenceMatcherPipeline, OVOSAbstractApplication):
                 LOG.debug(f"Persona stopped: {persona}")
                 return
             if ans:  # might be None
+            
+                # add GUI-page
+                self.gui["title"] = f"Persona: {persona}"
+                self.gui["text"] = ans
+                self.gui.show_page("PersonaResponse", override_idle=60)
+    
                 self.speak(ans)
                 handled = True
         if not handled:
