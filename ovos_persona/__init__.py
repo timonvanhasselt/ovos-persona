@@ -700,21 +700,26 @@ class PersonaService(ConfidenceMatcherPipeline, OVOSAbstractApplication):
 
         handled = False
         self._active_sessions[sess.session_id] = True
+
+        # PyHTMX GUI show page
+        self.gui["title"] = persona_id
+        self.gui["text"] = "..."
+        self.gui.show_page("PersonaResponse")
+
+        full_response = ""
         for ans in self.query(utt, persona_id, sess):
             if not self._active_sessions[sess.session_id]: # stopped
                 LOG.debug(f"Persona stopped: {persona_id}")
                 return
             if ans:  # might be None
-            
-                # add GUI-page
-                self.gui["title"] = f"Persona: {persona}"
-                self.gui["text"] = ans
-                self.gui.show_page("PersonaResponse", override_idle=60)
-    
+                full_response += ans
+                # Update the text in de GUI live during streaming
+                self.gui["text"] = full_response
                 self.speak(ans)
                 handled = True
         if not handled:
             self.speak_dialog("persona_error", {"persona": persona_id})
+            self.gui["text"] = "Something went wrong"
         self._active_sessions[sess.session_id] = False
 
     def handle_persona_summon(self, message):
